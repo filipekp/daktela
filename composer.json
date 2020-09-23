@@ -1,6 +1,6 @@
 {
   "name": "filipekp/daktela",
-  "description": "projekt helperů pro podporu systémů",
+  "description": "Library for comunication with Daktela API.",
   "license": "proprietary",
   "authors": [
     {
