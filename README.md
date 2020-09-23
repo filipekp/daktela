@@ -1,4 +1,4 @@
-# filipekp/daktela
+# Daktela API Library
 Library for comunication with Daktela API.
 
 
@@ -8,13 +8,13 @@ Installation and requirements
 The recommended way to is via Composer:
 
 ```shell
-composer require tracy/tracy
+composer require filipekp/daktela
 ```
 
 Usage
 -----
 
-Activating Tracy is easy. Simply add these two lines of code, preferably just after library loading (like `require 'vendor/autoload.php'`) and before any output is sent to browser:
+Activating Daktela Library is easy. Simply add these two lines of code, preferably just after library loading (like `require_once 'vendor/autoload.php'`) and before any output is sent to browser:
 
 ```php
   use Tracy\Debugger;
