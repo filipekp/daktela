@@ -34,7 +34,7 @@
     
     private $lastHttpStatus = NULL;
     
-    private function __construct($baseUrl, $accessToken) {
+    private function __construct($baseUrl, $accessToken = '') {
       self::$_BASE_URL_MY_DAKTELA = $baseUrl;
       self::$_ACCESS_TOKEN = $accessToken;
     }
@@ -71,9 +71,11 @@
       }
       
       $ch = curl_init();
-        $queryParams = array_merge($queryParams, [
-          "accessToken" => self::$_ACCESS_TOKEN
-        ]);
+        if (self::$_ACCESS_TOKEN) {
+          $queryParams = array_merge($queryParams, [
+            "accessToken" => self::$_ACCESS_TOKEN
+          ]);
+        }
         
         $unmaskedUrl = vsprintf(self::API_URL_SCHEMA, [
           self::$_BASE_URL_MY_DAKTELA,
@@ -105,14 +107,11 @@
         }
         
       curl_close($ch);
-  
-      Debugger::barDump($response, $this->lastHttpStatus);
       
       if ($response) {
         $decodedResponse = json_decode($response);
         $myDecodedResponse = (array)$decodedResponse;
         $decodedResponseArr = MyArray::init($myDecodedResponse);
-          Debugger::barDump($decodedResponse);
         
         // vyhození vyjímky v případě chyby.
         if (($errors = $decodedResponseArr->item('error'))) {
@@ -141,5 +140,26 @@
      */
     public function getLastHttpStatus() {
       return $this->lastHttpStatus;
+    }
+  
+    /**
+     * Vrátí access token pro požadavky.
+     *
+     * @param $login
+     * @param $password
+     *
+     * @return mixed|string
+     * @throws \Exception
+     */
+    public function getToken($login, $password) {
+      $result = $this->execute('login', [], [
+        'username'   => $login,
+        'password'   => $password,
+        'only_token' => 1
+      ], self::REQTYPE_POST);
+      
+      self::$_ACCESS_TOKEN = $result;
+      
+      return self::$_ACCESS_TOKEN;
     }
   }
