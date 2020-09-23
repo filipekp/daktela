@@ -5,7 +5,7 @@
   use PF\helpers\MyArray;
   use Tracy\Debugger;
   use Tracy\ILogger;
-
+  
   /**
    * Třída DaktelaConnector.
    *
@@ -17,7 +17,7 @@
   {
     const API_VERSION = 'v6';
     const API_URL_SCHEMA = 'https://%s/api/%s/%s.json?%s';
-  
+    
     const REQTYPE_GET   = 'GET';
     const REQTYPE_POST  = 'POST';
     const REQTYPE_PUT   = 'PUT';
@@ -38,15 +38,16 @@
       self::$_BASE_URL_MY_DAKTELA = $baseUrl;
       self::$_ACCESS_TOKEN = $accessToken;
     }
-  
+    
     /**
      * Vytvoří konektor pro komunikaci s DAKTELA api.
+     *
      * @param $baseUrl
      * @param $accessToken
      *
      * @return DaktelaConnector
      */
-    public static function init($baseUrl, $accessToken) {
+    public static function init($baseUrl, $accessToken = '') {
       if (is_null(self::$instance)) {
         self::$instance = new self($baseUrl, $accessToken);
       }
@@ -56,7 +57,7 @@
       
       return self::$instance;
     }
-  
+    
     /**
      * @param string $endpoint
      * @param array  $queryParams
@@ -71,41 +72,45 @@
       }
       
       $ch = curl_init();
-        if (self::$_ACCESS_TOKEN) {
-          $queryParams = array_merge($queryParams, [
-            "accessToken" => self::$_ACCESS_TOKEN
-          ]);
-        }
-        
-        $unmaskedUrl = vsprintf(self::API_URL_SCHEMA, [
-          self::$_BASE_URL_MY_DAKTELA,
-          self::API_VERSION,
-          $endpoint,
-          http_build_query($queryParams),
+      if (self::$_ACCESS_TOKEN) {
+        $queryParams = array_merge($queryParams, [
+          "accessToken" => self::$_ACCESS_TOKEN
         ]);
-        
-        curl_setopt($ch, CURLOPT_URL, $unmaskedUrl);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $requestType);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($ch, CURLOPT_HEADER, FALSE);
-        if (in_array($requestType, [self::REQTYPE_PUT, self::REQTYPE_POST])) {
-          curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
-          curl_setopt($ch, CURLOPT_POST, 1);
-          curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        } else {
-          curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
-        }
-        $response = curl_exec($ch);
-        $this->lastHttpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        
-        if ($this->lastHttpStatus >= 500) {
-          throw new \Exception('Internal server error.', $this->lastHttpStatus);
-        }
-        
-        if (($errNo = curl_errno($ch))) {
-          throw new \Exception(curl_error($ch), $errNo);
-        }
-        
+      }
+      
+      $unmaskedUrl = vsprintf(self::API_URL_SCHEMA, [
+        self::$_BASE_URL_MY_DAKTELA,
+        self::API_VERSION,
+        $endpoint,
+        http_build_query($queryParams),
+      ]);
+      
+      curl_setopt($ch, CURLOPT_URL, $unmaskedUrl);
+      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $requestType);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+      curl_setopt($ch, CURLOPT_HEADER, FALSE);
+      if (in_array($requestType, [self::REQTYPE_PUT, self::REQTYPE_POST])) {
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+      } else {
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
+      }
+      $response = curl_exec($ch);
+      $this->lastHttpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      
+      if ($this->lastHttpStatus >= 500) {
+        throw new \Exception('Internal server error.', $this->lastHttpStatus);
+      }
+      
+      if ($this->lastHttpStatus == 401) {
+        throw new \Exception('Unauthorized!', $this->lastHttpStatus);
+      }
+      
+      if (($errNo = curl_errno($ch))) {
+        throw new \Exception(curl_error($ch), $errNo);
+      }
+      
       curl_close($ch);
       
       if ($response) {
@@ -134,14 +139,14 @@
       
       return $this->lastHttpStatus;
     }
-  
+    
     /**
      * @return integer|null
      */
     public function getLastHttpStatus() {
       return $this->lastHttpStatus;
     }
-  
+    
     /**
      * Vrátí access token pro požadavky.
      *
