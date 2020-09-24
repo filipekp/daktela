@@ -58,7 +58,7 @@
     public function setCustomFields($customFields) {
       $this->customFields = [];
       
-      if ($this->customFields) {
+      if ($customFields) {
         foreach ($customFields as $customFieldName => $values) {
           $customField = new CustomField();
           $customField->contact = $this;
@@ -68,6 +68,8 @@
           $this->customFields[] = $customField;
         }
       }
+      
+      return $this;
     }
   
     /**
