@@ -15,7 +15,7 @@
   {
     protected $modelName = 'formFields';
   
-    public function create() { }
+    public function create(Entity $object) { }
   
     public function update(Entity $object) { }
   }
