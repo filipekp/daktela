@@ -18,13 +18,15 @@
     protected $requiredProperties = [];
     
     public function __construct($data = []) {
-      foreach ($data as $property => $value) {
-        $classProperty = lcfirst(MyString::camelize($property));
-        $methodName = 'set' . ucfirst($classProperty);
-        if (method_exists($this, $methodName)) {
-          $this->{$methodName}($value);
-        } elseif (property_exists($this, $classProperty)) {
-          $this->{$classProperty} = $value;
+      if ($data && is_array($data)) {
+        foreach ($data as $property => $value) {
+          $classProperty = lcfirst(MyString::camelize($property));
+          $methodName = 'set' . ucfirst($classProperty);
+          if (method_exists($this, $methodName)) {
+            $this->{$methodName}($value);
+          } elseif (property_exists($this, $classProperty)) {
+            $this->{$classProperty} = $value;
+          }
         }
       }
     }
