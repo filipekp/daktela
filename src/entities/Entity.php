@@ -18,6 +18,7 @@
     protected $requiredProperties = [];
     
     public function __construct($data = []) {
+      $data = (array)$data;
       if ($data && is_array($data)) {
         foreach ($data as $property => $value) {
           $classProperty = lcfirst(MyString::camelize($property));
