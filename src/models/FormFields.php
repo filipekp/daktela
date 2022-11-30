@@ -13,7 +13,7 @@
    */
   class FormFields extends DefaultModel
   {
-    protected $modelName = 'formFields';
+    protected $modelName = 'formCrmFields';
   
     public function create(Entity $object) { }
   
